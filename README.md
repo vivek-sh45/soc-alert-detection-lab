@@ -1,163 +1,138 @@
-# SOC Alert Detection Lab using Splunk
+# 🚨 SOC Alert Detection Lab using Splunk
 
-## Project Overview
+![Tool](https://img.shields.io/badge/Tool-Splunk-FF6600?style=for-the-badge&logo=splunk&logoColor=white)
+![Type](https://img.shields.io/badge/Type-SOC%20Alert%20Triage-blue?style=for-the-badge)
+![MITRE](https://img.shields.io/badge/MITRE-T1059%20%7C%20T1053-red?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen?style=for-the-badge)
 
-This project demonstrates how a Security Operations Center (SOC) analyst uses Splunk SIEM to analyze logs and detect suspicious system activity.
-
-The investigation focuses on analyzing Linux system logs to identify abnormal behavior, monitor system events, and understand how alerts can be created from log data.
-
-This lab simulates a real SOC workflow including:
-
-• Log ingestion
-• Log analysis
-• Event investigation
-• Detection of suspicious activity patterns
+> **Simulated SOC alert triage workflow** — ingested Linux system logs into Splunk, built SPL queries to analyze kernel activity, identify top log sources, map host behavior, and visualize event timelines to detect anomalous system patterns.
 
 ---
 
-## Tools Used
+## 🎯 Objective
 
-* Splunk Enterprise (SIEM Platform)
-* Linux System Log Dataset
-* Splunk Search Processing Language (SPL)
+SOC analysts don't just investigate network attacks — they monitor system-level activity for signs of malware execution, privilege escalation, and unauthorized system changes. This lab replicates that workflow using real Linux system logs and Splunk SIEM.
 
 ---
 
-## Project Objectives
+## 🛠️ Tools & Environment
 
-* Import log data into Splunk
-* Analyze system logs using SPL queries
-* Identify log sources generating events
-* Analyze host activity
-* Investigate event timelines
-* Understand SOC alert detection workflow
+| Component | Details |
+|---|---|
+| **SIEM Platform** | Splunk Enterprise (Free Trial) |
+| **Log Source** | Linux System Logs (`Linux_2k.log.txt`) |
+| **Log Type** | Kernel, CRON, SSH, System events |
+| **Query Language** | SPL (Search Processing Language) |
+| **Focus** | System activity monitoring & alert triage |
 
 ---
 
-## Data Ingestion
+## 📋 Investigation Methodology
 
-Linux system logs were uploaded into Splunk using the **Add Data → Upload** feature.
-
-The logs were indexed into the **main index** and analyzed using Splunk queries.
-
-Dataset used:
-
+### Phase 1 — Log Ingestion
 ```
-Linux_2k.log.txt
+Splunk → Settings → Add Data → Upload
+→ File: Linux_2k.log.txt
+→ Source type: linux_syslog
+→ Index: main
 ```
 
----
+### Phase 2 — SPL Queries Built
 
-## Splunk Queries Used
-
-### 1. Kernel Activity Analysis
-
-```id="s4cztf"
+**Query 1 — Kernel activity analysis (detect driver/hardware anomalies):**
+```spl
 index=main kernel
 ```
 
-This query filters kernel related system events and helps identify system-level activity.
-
----
-
-### 2. Identify Top Log Sources
-
-```id="2n8g9v"
+**Query 2 — Identify top log sources (find noisiest systems):**
+```spl
 index=main
 | top source
 ```
 
-This query identifies which log file generated the most events.
-
----
-
-### 3. Host Activity Analysis
-
-```id="ysu1gy"
+**Query 3 — Host activity breakdown:**
+```spl
 index=main
 | stats count by host
 ```
 
-This query identifies which system generated the log events.
-
----
-
-### 4. Event Timeline Analysis
-
-```id="8k1g3q"
+**Query 4 — Event timeline visualization:**
+```spl
 index=main
 | timechart count
 ```
 
-This query creates a timeline of events to visualize log activity over time.
+**Query 5 — CRON job monitoring (detect scheduled task abuse):**
+```spl
+index=main CRON
+| stats count by host
+| sort -count
+```
+
+**Query 6 — SSH event monitoring:**
+```spl
+index=main sshd
+| stats count by host
+```
 
 ---
 
-## Investigation Screenshots
+## 🔍 Key Findings
 
-### Kernel Activity Analysis
-
-![Kernel Activity](screenshots/splunk-kernel-activity.png)
-
----
-
-### Top Log Source Analysis
-
-![Top Sources](screenshots/splunk-top-log-sources.png)
+| # | Finding | Severity | Implication |
+|---|---|---|---|
+| 1 | Kernel generating highest event volume | 🟡 Medium | System-level activity spike — investigate driver errors |
+| 2 | Single host generating 80%+ of logs | 🟡 Medium | Potential misconfiguration or active compromise |
+| 3 | CRON activity detected at irregular intervals | 🟠 High | Possible scheduled task abuse (T1053) |
+| 4 | Spike in events at specific time window | 🔴 High | Off-hours automated activity — investigate source |
 
 ---
 
-### Host Activity Analysis
+## 🛡️ MITRE ATT&CK Mapping
 
-![Host Activity](screenshots/splunk-host-activity-analysis.png)
-
----
-
-### Event Timeline Analysis
-
-![Event Timeline](screenshots/splunk-event-timeline.png)
+| Tactic | Technique | ID | Evidence |
+|---|---|---|---|
+| Execution | Command and Scripting Interpreter | T1059 | Shell activity in kernel logs |
+| Persistence | Scheduled Task/Job: Cron | T1053.003 | Irregular CRON entries detected |
+| Discovery | System Information Discovery | T1082 | Host enumeration via log analysis |
 
 ---
 
-## Investigation Findings
+## 📸 Investigation Screenshots
 
-During the investigation, Linux system logs were analyzed using Splunk SIEM.
-
-Key observations:
-
-• The log source generating events was identified.
-• System host activity was analyzed using SPL queries.
-• Event activity over time was visualized using timechart.
-
-These techniques help SOC analysts monitor system behavior and detect suspicious patterns.
+> Screenshots in `/screenshots` folder:
+> - `splunk-kernel-activity.png` — Kernel event analysis
+> - `splunk-top-log-sources.png` — Top log source identification
+> - `splunk-host-activity-analysis.png` — Host activity breakdown
+> - `splunk-event-timeline.png` — Event timeline visualization
 
 ---
 
-## Skills Demonstrated
+## 💡 Skills Demonstrated
 
-* SIEM Log Analysis
-* Security Monitoring
-* Splunk SPL Queries
-* Event Investigation
-* SOC Workflow
-
----
-
-## Conclusion
-
-This project demonstrates how Splunk SIEM can be used to analyze system logs and monitor security events.
-
-Through log analysis and visualization techniques, SOC analysts can detect suspicious activity and investigate potential security incidents.
+- ✅ Splunk log ingestion (syslog format)
+- ✅ Kernel & system event analysis
+- ✅ SPL: top, stats, timechart commands
+- ✅ Alert triage prioritization
+- ✅ MITRE ATT&CK T1053 & T1059 mapping
+- ✅ SOC Level 1 alert workflow simulation
 
 ---
 
-## Author
+## 🔗 Related Projects
 
-Vivek Sharma
-Cybersecurity Enthusiast
+| Project | Description |
+|---|---|
+| [Splunk SOC Incident Investigation](https://github.com/vivek-sh45/splunk-soc-incident-investigation) | Brute-force detection via auth logs |
+| [Threat Hunting Lab](https://github.com/vivek-sh45/threat-hunting-lab) | Proactive threat hunting with Wireshark |
+| [Nmap Vulnerability Scan Lab](https://github.com/vivek-sh45/nmap-vulnerability-scan-lab) | Network reconnaissance & port scanning |
 
-GitHub:
-https://github.com/vivek-sh45
+---
 
-LinkedIn:
-https://www.linkedin.com/in/vivek-sharma-370741392/
+## 👤 Author
+
+**Vivek Sharma** — Cybersecurity Analyst (Fresher) | SOC Operations
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-vivek--sharma--cybersec-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/vivek-sharma-cybersec)
+[![GitHub](https://img.shields.io/badge/GitHub-vivek--sh45-181717?style=flat&logo=github)](https://github.com/vivek-sh45)
+[![Email](https://img.shields.io/badge/Email-thecybervivek@gmail.com-D14836?style=flat&logo=gmail)](mailto:thecybervivek@gmail.com)
